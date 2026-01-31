@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Portal | MindGuard</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="dashboard-bg">
+    <nav class="navbar">
+        <div class="logo-container">
+            <img src="photo/logo.png" alt="Logo" class="logo-img">
+            <span class="brand-name">MindGuard Admin</span>
+        </div>
+        <a href="index.html" class="btn btn-secondary">Logout</a>
+    </nav>
+
+    <main class="container">
+        <h1>Institutional <span class="blue-text">Stress Alerts</span></h1>
+        
+        <div class="card" style="margin-top: 2rem;">
+            <h3>High-Risk Students (Real-time)</h3>
+            <table style="width: 100%; border-collapse: collapse; margin-top: 1rem;">
+                <tr style="text-align: left; border-bottom: 1px solid #eee;">
+                    <th style="padding: 1rem;">Student ID</th>
+                    <th>Latest Mood</th>
+                    <th>Risk Level</th>
+                    <th>Action</th>
+                </tr>
+                <tr>
+                    <td style="padding: 1rem;">STU_4492</td>
+                    <td>😰 Anxious</td>
+                    <td><span style="color: red; font-weight: bold;">Critical</span></td>
+                    <td><button class="btn btn-primary" style="padding: 0.5rem 1rem;">Alert Counselor</button></td>
+                </tr>
+            </table>
+        </div>
+    </main>
+</body>
+</html>

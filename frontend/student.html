@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard | MindEase</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* Additional Styles for Multilingual Chat Integration */
+        .chat-container {
+            position: fixed;
+            bottom: 90px;
+            right: 20px;
+            width: 350px;
+            height: 500px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            display: flex;
+            flex-direction: column;
+            z-index: 1000;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .chat-overlay {
+            position: absolute;
+            inset: 0;
+            background: white;
+            z-index: 1001;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .lang-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .lang-btn {
+            background: white;
+            border: 2px solid #2563eb;
+            padding: 10px;
+            border-radius: 10px;
+            font-weight: bold;
+            color: #2563eb;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .lang-btn:hover { background: #2563eb; color: white; }
+
+        .chat-header {
+            background: #2563eb;
+            color: white;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-actions { display: flex; gap: 10px; align-items: center; }
+
+        .btn-change-lang {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            background: #f8fafc;
+        }
+
+        .message {
+            max-width: 85%;
+            padding: 10px 14px;
+            border-radius: 15px;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .user-msg {
+            align-self: flex-end;
+            background: #2563eb;
+            color: white;
+            border-bottom-right-radius: 2px;
+        }
+
+        .bot-msg {
+            align-self: flex-start;
+            background: white;
+            border: 1px solid #e2e8f0;
+            color: #1e293b;
+            border-bottom-left-radius: 2px;
+        }
+
+        .hidden { display: none !important; }
+
+        .chatbot-toggler {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            background: #2563eb;
+            border: none;
+            border-radius: 50%;
+            color: white;
+            font-size: 28px;
+            cursor: pointer;
+            box-shadow: 0 10px 25px rgba(37, 99, 235, 0.3);
+            z-index: 999;
+            transition: transform 0.3s ease;
+        }
+
+        .chatbot-toggler:hover {
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+<body class="bg-light">
+
+    <nav class="dashboard-nav">
+        <div class="navbar">
+            <div class="logo-container">
+                <img src="photo/logo.png" class="logo-img" alt="Logo">
+                <span class="brand-name">MindEase</span>
+            </div>
+            <div class="user-profile">
+                <span class="text-light">Hi, Alex</span>
+                <a href="login.html" class="btn-logout">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="dashboard-wrapper">
+        <div class="main-column">
+            <header class="welcome-card">
+                <span class="badge">Daily Check-in</span>
+                <h1>Welcome, you're not alone.</h1>
+                <p class="text-light">Taking a moment for yourself is the first step. How are you feeling right now?</p>
+            </header>
+
+            <section class="card">
+                <h3 class="tagline">How is your mood today?</h3>
+                <div class="mood-grid">
+                    <button class="mood-card" onclick="toggleMood(this)">
+                        <span class="emoji">😊</span>
+                        <span>Happy</span>
+                    </button>
+                    <button class="mood-card" onclick="toggleMood(this)">
+                        <span class="emoji">😐</span>
+                        <span>Okay</span>
+                    </button>
+                    <button class="mood-card" onclick="toggleMood(this)">
+                        <span class="emoji">😟</span>
+                        <span>Stressed</span>
+                    </button>
+                    <button class="mood-card" onclick="toggleMood(this)">
+                        <span class="emoji">😣</span>
+                        <span>Overwhelmed</span>
+                    </button>
+                </div>
+            </section>
+
+            <section class="card">
+                <h3 class="tagline">Quick Stress Check</h3>
+                <div class="stress-survey">
+                    <div class="question-item">
+                        <label class="question-text">1. I feel overwhelmed by my current workload.</label>
+                        <div class="options-row">
+                            <label class="option-pill"><input type="radio" name="q1"> <span class="option-label">Never</span></label>
+                            <label class="option-pill"><input type="radio" name="q1"> <span class="option-label">Sometimes</span></label>
+                            <label class="option-pill"><input type="radio" name="q1"> <span class="option-label">Often</span></label>
+                            <label class="option-pill"><input type="radio" name="q1"> <span class="option-label">Always</span></label>
+                        </div>
+                    </div>
+                </div>
+                <button class="btn btn-primary btn-block mt-2" id="submitCheckin">Submit Check-In</button>
+                <div id="resultArea" class="result-container hidden">
+                    <div class="feedback-alert yellow">
+                        <strong>Taking it day by day.</strong><br>
+                        You seem a bit stressed. Try talking to our MindEase Helper below!
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <aside class="sidebar-column">
+            <div class="card">
+                <h3>System Status</h3>
+                <div class="status-card" style="box-shadow: none; padding: 1rem 0;">
+                    <div class="dot"></div>
+                    <span class="status-pill status-increase">Live Support Online</span>
+                </div>
+            </div>
+            <div class="card">
+                <h3>Self-Care Toolkit</h3>
+                <a href="#" class="support-item">🧘 5-Min Meditation</a>
+                <a href="#" class="support-item">🎵 Calming Sounds</a>
+                <a href="#" class="support-item">📞 Student Hotline</a>
+            </div>
+        </aside>
+    </main>
+
+    <div id="successModal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <div class="success-icon">✓</div>
+            <h2>Submitted!</h2>
+            <p>Your check-in has been recorded. Thank you for taking care of yourself today.</p>
+            <button class="btn btn-primary" onclick="closeModal()">Close</button>
+        </div>
+    </div>
+
+    <!-- Chat Toggle Button -->
+    <button class="chatbot-toggler" onclick="toggleChat()">
+        <span>💬</span>
+    </button>
+
+    <!-- Chat Window -->
+    <div id="chatWindow" class="chat-container hidden">
+        <!-- Language Selection Overlay -->
+        <div id="langOverlay" class="chat-overlay">
+            <h3 style="color: #1e40af; margin-bottom: 10px;">Welcome to MindEase</h3>
+            <p style="font-size: 13px; color: #64748b;">Select a language to speak with Healix:</p>
+            <div class="lang-grid">
+                <button class="lang-btn" onclick="selectLanguage('en')">English</button>
+                <button class="lang-btn" onclick="selectLanguage('hi')">Hindi</button>
+                <button class="lang-btn" onclick="selectLanguage('ta')">Tamil</button>
+                <button class="lang-btn" onclick="selectLanguage('gu')">Gujarati</button>
+            </div>
+        </div>
+
+        <!-- Chat Header -->
+        <div class="chat-header">
+            <div class="header-info" style="display: flex; align-items: center; gap: 8px;">
+                <div class="dot" style="background: #4ade80; width: 8px; height: 8px; border-radius: 50%;"></div>
+                <span style="font-weight: 600;">Healix Helper</span>
+            </div>
+            <div class="header-actions">
+                <button class="btn-change-lang" onclick="resetChat()">Change Language</button>
+                <button class="close-chat" onclick="toggleChat()" style="background:none; border:none; color:white; font-size:20px; cursor:pointer;">×</button>
+            </div>
+        </div>
+
+        <!-- Chat Messages Area -->
+        <div id="chatMessages" class="chat-messages"></div>
+
+        <!-- Chat Input Area -->
+        <div class="chat-input-wrapper" style="padding: 15px; background: white; border-top: 1px solid #e2e8f0; display: flex; gap: 10px;">
+            <input type="text" id="chatInput" placeholder="How are you feeling?" style="flex:1; border: 1px solid #e2e8f0; border-radius: 20px; padding: 8px 15px; outline: none;" onkeypress="handleKey(event)">
+            <button id="sendBtn" onclick="handleSendMessage()" style="background: #2563eb; color: white; border: none; border-radius: 50%; width: 35px; height: 35px; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+                <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path></svg>
+            </button>
+        </div>
+    </div>
+
+    <script>
+    // ============================================
+    // CHATBOT CONFIGURATION
+    // ============================================
+    // Change this to your deployed API URL when in production
+    // For local development: http://127.0.0.1:8000/chat
+    // For production: https://your-render-app.onrender.com/chat
+    const API_URL = "https://chatbot-9sq4.onrender.com/chat";
+    
+    let selectedLang = null;
+    let chatHistory = [];
+
+    const greetings = {
+        hi: "नमस्ते! मैं Healix हूँ। आज आप कैसा महसूस कर रहे हैं?",
+        ta: "வணக்கம்! நான் Healix. இன்று உங்கள் மனநிலை எப்படி இருக்கிறது?",
+        gu: "નમસ્તે! હું Healix છું. આજે તમે કેવું અનુભવો છો?",
+        en: "Hi! I'm Healix, your MindEase companion. How are you feeling today?"
+    };
+
+    // ============================================
+    // CHAT WINDOW MANAGEMENT
+    // ============================================
+    function toggleChat() {
+        const win = document.getElementById('chatWindow');
+        win.classList.toggle('hidden');
+    }
+
+    function selectLanguage(code) {
+        selectedLang = code;
+        document.getElementById('langOverlay').classList.add('hidden');
+        addMessage(greetings[code] || greetings.en, 'bot');
+    }
+
+    function resetChat() {
+        selectedLang = null;
+        chatHistory = [];
+        document.getElementById('chatMessages').innerHTML = '';
+        document.getElementById('langOverlay').classList.remove('hidden');
+    }
+
+    // ============================================
+    // MESSAGE HANDLING
+    // ============================================
+    function handleKey(e) {
+        if (e.key === 'Enter') handleSendMessage();
+    }
+
+    async function handleSendMessage() {
+        const input = document.getElementById('chatInput');
+        const text = input.value.trim();
+        
+        if (!text) return;
+        if (!selectedLang) {
+            alert('Please select a language first!');
+            return;
+        }
+
+        // Add user message to chat
+        addMessage(text, 'user');
+        input.value = '';
+
+        // Add typing indicator
+        const typingId = 'typing-' + Date.now();
+        addMessage('Healix is typing...', 'bot', typingId);
+
+        try {
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    message: text,
+                    target_language: selectedLang,
+                    chat_history: chatHistory
+                })
+            });
+
+            // Remove typing indicator
+            const typingElement = document.getElementById(typingId);
+            if (typingElement) typingElement.remove();
+
+            if (response.ok) {
+                const data = await response.json();
+                console.log('API Response:', data);
+                
+                // Add bot response
+                addMessage(data.text, 'bot');
+            } else {
+                addMessage("I'm having trouble connecting right now. Please try again.", 'bot');
+                console.error('API Error:', response.status);
+            }
+        } catch (error) {
+            // Remove typing indicator
+            const typingElement = document.getElementById(typingId);
+            if (typingElement) typingElement.remove();
+            
+            addMessage("Connection error. Make sure the MindEase server is running.", 'bot');
+            console.error('Connection Error:', error);
+        }
+    }
+
+    function addMessage(text, sender, id = null) {
+        const chatDiv = document.getElementById('chatMessages');
+        const msgDiv = document.createElement('div');
+        msgDiv.className = `message ${sender === 'user' ? 'user-msg' : 'bot-msg'}`;
+        if (id) msgDiv.id = id;
+        msgDiv.innerText = text;
+        chatDiv.appendChild(msgDiv);
+        
+        // Update chat history (skip typing indicators)
+        if (sender && !text.includes('typing')) {
+            chatHistory.push({ 
+                role: sender === 'user' ? 'user' : 'assistant', 
+                content: text 
+            });
+        }
+        
+        // Auto-scroll to bottom
+        chatDiv.scrollTop = chatDiv.scrollHeight;
+    }
+
+    // ============================================
+    // DASHBOARD FUNCTIONS (Keep your existing ones)
+    // ============================================
+    function toggleMood(element) {
+        // Remove active class from all mood cards
+        document.querySelectorAll('.mood-card').forEach(card => {
+            card.classList.remove('active');
+        });
+        // Add active class to clicked card
+        element.classList.add('active');
+    }
+
+    function closeModal() {
+        document.getElementById('successModal').classList.add('hidden');
+    }
+
+    // Submit check-in functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        const submitBtn = document.getElementById('submitCheckin');
+        if (submitBtn) {
+            submitBtn.addEventListener('click', function() {
+                const resultArea = document.getElementById('resultArea');
+                const modal = document.getElementById('successModal');
+                
+                if (resultArea) resultArea.classList.remove('hidden');
+                if (modal) modal.classList.remove('hidden');
+            });
+        }
+    });
+    </script>
+</body>
+</html>

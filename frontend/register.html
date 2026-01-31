@@ -1,0 +1,110 @@
+<button class="chatbot-toggler" onclick="toggleChat()">
+    <span>💬</span>
+</button>
+
+<div id="chatWindow" class="chat-container hidden">
+    <div class="chat-header">
+        <div class="header-info">
+            <div class="dot"></div>
+            <span>MindEase Helper</span>
+        </div>
+        <button class="close-chat" onclick="toggleChat()">×</button>
+    </div>
+    <div id="chatMessages" class="chat-messages">
+        <div class="message bot-msg">Hello! I'm your MindEase assistant. How can I help you today?</div>
+    </div>
+    <div class="chat-input-wrapper">
+        <input type="text" id="chatInput" placeholder="Type your question..." onkeypress="if(event.key === 'Enter') sendChatMessage()">
+        <button id="sendBtn" onclick="sendChatMessage()">
+            <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path></svg>
+        </button>
+    </div>
+</div>
+
+<script>
+    let chatHistory = [];
+
+    // 1. UI Toggle Logic
+    function toggleChat() {
+        const win = document.getElementById('chatWindow');
+        if (win) win.classList.toggle('hidden');
+    }
+
+    function toggleMood(btn) {
+        document.querySelectorAll('.mood-card').forEach(c => c.classList.remove('active'));
+        btn.classList.add('active');
+    }
+
+    function closeModal() {
+        document.getElementById('successModal').classList.add('hidden');
+        document.getElementById('resultArea').classList.remove('hidden');
+    }
+
+    // 2. Chat Logic
+    async function sendChatMessage() {
+        const input = document.getElementById('chatInput');
+        const messages = document.getElementById('chatMessages');
+        const text = input.value.trim();
+        
+        if(!text) return;
+
+        // Display User Message
+        appendMessage('user', text);
+        input.value = '';
+
+        // Display Bot Loading State
+        const botMsgId = 'bot-' + Date.now();
+        appendMessage('bot', '...', botMsgId);
+
+        try {
+            // MATCHING YOUR SCHEMA EXACTLY
+            const payload = {
+                "message": text,
+                "target_language": "english",
+                "chat_history": chatHistory,
+                "wants_audio": false,
+                "is_voice": false
+            };
+
+            const response = await fetch('https://chatbot-9sq4.onrender.com/chat', {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) throw new Error(`Server error: ${response.status}`);
+
+            const data = await response.json();
+            console.log("Chatbot Data Received:", data);
+
+            // Flexible response handling: try common keys
+            const botResponse = data.response || data.message || data.reply || data.answer || "I'm processing your request.";
+            
+            document.getElementById(botMsgId).innerText = botResponse;
+            chatHistory.push({"user": text, "bot": botResponse});
+
+        } catch (err) {
+            console.error("Chat Error:", err);
+            document.getElementById(botMsgId).innerText = "I'm having trouble connecting to the server. Check the console for details.";
+        }
+        messages.scrollTop = messages.scrollHeight;
+    }
+
+    function appendMessage(sender, text, id = null) {
+        const messages = document.getElementById('chatMessages');
+        const msgDiv = document.createElement('div');
+        msgDiv.className = `message ${sender}-msg`;
+        if(id) msgDiv.id = id;
+        msgDiv.innerText = text;
+        messages.appendChild(msgDiv);
+        messages.scrollTop = messages.scrollHeight;
+    }
+
+    // Attach submit listener
+    document.getElementById('submitCheckin').addEventListener('click', () => {
+        document.getElementById('successModal').classList.remove('hidden');
+    });
+</script>
